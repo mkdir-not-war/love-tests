@@ -3,9 +3,11 @@
 ]]--
 
 local socket = require "socket"
+local io = require "io"
 
 -- server address and port
-local address, port = "localhost", 8888
+local port = 8888
+local address = "localhost"
 
 local entity
 local updaterate = 0.1
@@ -21,6 +23,9 @@ function love.load()
 
 	-- Because clients only talk to the single server, 
 	-- they can set peer name.
+	print("input IP address of server <xxx.xxx.xxx.xxx>:")
+	local addr = io.read()
+	if addr ~= nil then address = addr end
 	udp:setpeername(address, port)
 
 	math.randomseed(os.time())
@@ -41,8 +46,14 @@ function love.update(dt)
 		if love.keyboard.isDown('s') then 	y=y+(20*t) end
 		if love.keyboard.isDown('a') then 	x=x-(20*t) end
 		if love.keyboard.isDown('d') then 	x=x+(20*t) end
+		if love.keyboard.isDown('escape') then love.event.quit() end
 		local dg = string.format("%s %s %f %f", entity, 'move', x, y)
 		udp:send(dg)
+
+		local dg = string.format("%s %s $", entity, 'update')
+		udp:send(dg)
+ 
+		t=t-updaterate -- set t for the next round
 	end
 
 	repeat
@@ -51,20 +62,21 @@ function love.update(dt)
 			ent, cmd, parms = data:match("^(%S*) (%S*) (.*)")
 			if cmd == 'at' then
 				local x, y = parms:match("^(%-?[%d.e]*) (%-?[%d.e]*)$")
-				assert(x and y)
+				assert(x and y) -- validation is better, but asserts will serve.
 				x, y = tonumber(x), tonumber(y)
 				world[ent] = {x=x, y=y}
 			else
 				print("unrecognised command:", cmd)
 			end
-		elseif msg ~= 'timeout' then
+ 
+		elseif msg ~= 'timeout' then 
 			error("Network error: "..tostring(msg))
 		end
 	until not data
 end
 
 function love.draw()
-	love.graphics.setColor(0.28, 0.63, 0.05) 
+	love.graphics.setColor(0.28, 0.63, 0.05)
 	for k, v in pairs(world) do
 		love.graphics.print(k, v.x, v.y)
 	end
