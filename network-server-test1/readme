@@ -1,1 +1,0 @@
-be sure to use lua5.1, because luasocket isn't made for lua5.3 (lua)

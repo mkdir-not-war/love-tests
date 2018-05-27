@@ -5,8 +5,6 @@
 local socket = require "socket"
 local udp = socket.udp()
 
-
-
 local world = {} -- the empty world-state
 local data, msg_or_ip, port_or_nil
 local entity, cmd, parms
@@ -15,6 +13,13 @@ function love.load()
 	udp:settimeout(0)
 	udp:setsockname('*', 8888)
 	print "Beginning server loop."
+end
+
+function removeentity(entity)
+	for k in pairs(world[entity]) do
+		world[entity][k] = nil
+	end
+	world[entity] = nil
 end
 
 function love.update()
@@ -41,6 +46,19 @@ function love.update()
 			for k, v in pairs(world) do
 				udp:sendto(string.format("%s %s %d %d", k, 'at', v.x, v.y), msg_or_ip,  port_or_nil)
 			end
+		elseif cmd == 'disconnect' then
+			-- remove the entity from world
+			removeentity(entity)
+			for k, v in pairs(world) do
+				udp:sendto(string.format("%s %s $", entity, 'disconnect'), msg_or_ip,  port_or_nil)
+			end		
+			--[[print(entity, " removed")
+			for k, v in pairs(world) do
+				print(k)
+				for k2, v2 in pairs(v) do
+					print(k2, v2)
+				end
+			end]]--
 		elseif cmd == 'quit' then
 			love.event.quit()
 		else

@@ -65,6 +65,10 @@ function love.update(dt)
 				assert(x and y) -- validation is better, but asserts will serve.
 				x, y = tonumber(x), tonumber(y)
 				world[ent] = {x=x, y=y}
+			elseif cmd == 'disconnect' then
+				-- delete from world
+				table.remove(world, entity)
+				print(entity, " removed")
 			else
 				print("unrecognised command:", cmd)
 			end
@@ -76,8 +80,14 @@ function love.update(dt)
 end
 
 function love.draw()
-	love.graphics.setColor(0.28, 0.63, 0.05)
+	love.graphics.setColor(0.9, 0.63, 0.05)
+	love.graphics.print('hello world', 10, 10)
 	for k, v in pairs(world) do
 		love.graphics.print(k, v.x, v.y)
 	end
+end
+
+function love.quit()
+	local dg = string.format("%s %s $", entity, 'disconnect')
+	udp:send(dg)
 end
