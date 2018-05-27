@@ -37,6 +37,13 @@ function love.load()
 	t = 0
 end
 
+function removeentity(entity)
+	for k in pairs(world[entity]) do
+		world[entity][k] = nil
+	end
+	world[entity] = nil
+end
+
 function love.update(dt)
 	t = t + dt
 
@@ -67,8 +74,8 @@ function love.update(dt)
 				world[ent] = {x=x, y=y}
 			elseif cmd == 'disconnect' then
 				-- delete from world
-				table.remove(world, entity)
-				print(entity, " removed")
+				removeentity(ent)
+				print(ent, " removed")
 			else
 				print("unrecognised command:", cmd)
 			end

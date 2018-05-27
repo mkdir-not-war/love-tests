@@ -1,0 +1,4 @@
+to allow in and out UDP traffic (used by server to communicate):
+
+sudo ufw allow <port>
+sudo ufw enable
